@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#080c14">
+  <title>量化决策 · 移动工作台</title>
+  <link rel="stylesheet" href="/static/mobile.css">
+  <!-- ECharts 移动端优化版 -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body class="mobile-body">
+  <!-- 顶部状态栏 -->
+  <header class="m-header">
+    <div class="m-header-left">
+      <span class="m-logo-icon">⚡</span>
+      <h1 class="m-title">量化决策移动端</h1>
+    </div>
+    <div class="m-header-right">
+      <div class="m-sync-badge" id="m-sync-badge" title="点击手动刷新数据">
+        <span class="m-dot live" id="m-sync-dot"></span>
+        <span id="m-sync-text">实时</span>
+      </div>
+      <button class="m-notify-btn" id="m-btn-notify-settings" title="飞书推送设置">
+        🔔 推送
+      </button>
+      <a href="/?mode=desktop" class="m-desktop-link" title="切换到PC桌面完整版">🖥️ 完整版</a>
+    </div>
+  </header>
+
+  <!-- 标的滑动切换药丸栏 (Segmented Control) -->
+  <section class="m-symbol-tabs">
+    <button class="m-sym-tab active" data-symbol="sh600036" id="tab-cmb">
+      <div class="sym-name-row">
+        <span class="sym-icon">🌻</span>
+        <span class="sym-title">招商银行</span>
+      </div>
+      <div class="sym-price-row">
+        <span class="sym-price" id="cmb-live-price">--.--</span>
+        <span class="sym-pct" id="cmb-live-pct">0.00%</span>
+      </div>
+    </button>
+    <button class="m-sym-tab" data-symbol="sz000001" id="tab-pab">
+      <div class="sym-name-row">
+        <span class="sym-icon">🛡️</span>
+        <span class="sym-title">平安银行</span>
+      </div>
+      <div class="sym-price-row">
+        <span class="sym-price" id="pab-live-price">--.--</span>
+        <span class="sym-pct" id="pab-live-pct">0.00%</span>
+      </div>
+    </button>
+  </section>
+
+  <!-- 主体滚动区域 -->
+  <main class="m-main-scroll">
+    <!-- 实时行动决策大卡片 -->
+    <section class="m-decision-card" id="m-decision-card">
+      <div class="decision-header">
+        <div class="decision-pill is-wait" id="m-decision-pill">
+          <span class="decision-icon" id="m-decision-icon">⚪</span>
+          <span class="decision-text" id="m-decision-status">评估中</span>
+        </div>
+        <span class="decision-time-tag" id="m-decision-time">--:--</span>
+      </div>
+
+      <div class="decision-headline" id="m-decision-title">正在连接实时量化信号...</div>
+      <div class="decision-reason" id="m-decision-desc">正在扫描最新 5 分钟 K 线形态与均值回归通道...</div>
+
+      <!-- 三列执行参数 -->
+      <div class="decision-stats-grid">
+        <div class="stat-box">
+          <span class="stat-lbl">现价 / 信号价</span>
+          <b class="stat-val" id="m-stat-price">--.--</b>
+        </div>
+        <div class="stat-box highlight-profit">
+          <span class="stat-lbl">🎯 目标止盈</span>
+          <b class="stat-val" id="m-stat-tp">--.--</b>
+        </div>
+        <div class="stat-box highlight-loss">
+          <span class="stat-lbl">🛑 严格止损</span>
+          <b class="stat-val" id="m-stat-sl">--.--</b>
+        </div>
+      </div>
+    </section>
+
+    <!-- 图表控制与快速切换 -->
+    <section class="m-chart-control-row">
+      <div class="chart-title-tag">
+        <span id="m-chart-symbol-name">招商银行</span>
+        <span class="cycle-tag">5分钟K线</span>
+      </div>
+      <div class="chart-range-toggles">
+        <button class="range-btn active" data-limit="300">近3天</button>
+        <button class="range-btn" data-limit="1000">近1月</button>
+        <button class="range-btn" data-limit="10000">2026全量</button>
+      </div>
+    </section>
+
+    <!-- 手机自适应 K 线与买卖点图表 -->
+    <section class="m-chart-container">
+      <div id="mobile-kline-chart" class="mobile-chart-canvas"></div>
+    </section>
+
+    <!-- 策略回测统计指标简报 -->
+    <section class="m-metrics-card">
+      <div class="metrics-row">
+        <div class="metric-item">
+          <span class="lbl">胜率(60m)</span>
+          <b class="val up" id="m-metric-winrate">--%</b>
+        </div>
+        <div class="metric-item">
+          <span class="lbl">盈亏比</span>
+          <b class="val" id="m-metric-plr">--</b>
+        </div>
+        <div class="metric-item">
+          <span class="lbl">买点总数</span>
+          <b class="val" id="m-metric-buys">--</b>
+        </div>
+        <div class="metric-item">
+          <span class="lbl">卖点总数</span>
+          <b class="val" id="m-metric-sells">--</b>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模拟账户资产微型卡片 -->
+    <section class="m-account-card">
+      <div class="account-header">
+        <span class="acc-title">模拟操盘账户 (T+0回转)</span>
+        <button class="btn-micro" id="m-btn-reset-acc">重置</button>
+      </div>
+      <div class="account-grid">
+        <div class="acc-box">
+          <span class="acc-lbl">总资产</span>
+          <b class="acc-val" id="m-acc-total">¥100,000.00</b>
+        </div>
+        <div class="acc-box">
+          <span class="acc-lbl">可用资金</span>
+          <b class="acc-val" id="m-acc-cash">¥100,000.00</b>
+        </div>
+        <div class="acc-box">
+          <span class="acc-lbl">持仓股数</span>
+          <b class="acc-val" id="m-acc-shares">0 股</b>
+        </div>
+        <div class="acc-box">
+          <span class="acc-lbl">浮动盈亏</span>
+          <b class="acc-val up" id="m-acc-pnl">+¥0.00 (0.00%)</b>
+        </div>
+      </div>
+    </section>
+
+    <div style="height: 100px;"></div> <!-- 底部操作栏占位垫片 -->
+  </main>
+
+  <!-- 底部固定交易操作栏 (单手大拇指易触达) -->
+  <footer class="m-bottom-action-bar">
+    <div class="action-info">
+      <div class="action-price-line">
+        <span id="m-footer-sym">招商银行</span>
+        <b id="m-footer-price">--.--</b>
+      </div>
+      <div class="action-pos-line" id="m-footer-pos">持仓: 0股</div>
+    </div>
+    <div class="action-buttons">
+      <button class="btn-trade buy" id="m-btn-quick-buy">
+        <span>🟢 快速买入</span>
+        <small id="m-buy-sub">买入100股</small>
+      </button>
+      <button class="btn-trade sell" id="m-btn-quick-sell">
+        <span>🔴 快速卖出</span>
+        <small id="m-sell-sub">平仓/高抛</small>
+      </button>
+    </div>
+  </footer>
+
+  <!-- 底部半屏交易抽屉 (Bottom Sheet) -->
+  <div class="m-modal-mask" id="m-trade-mask"></div>
+  <div class="m-bottom-sheet" id="m-trade-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h3 id="m-sheet-title">快速下单交易</h3>
+      <button class="sheet-close" id="m-sheet-close">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="form-row">
+        <label>交易标的</label>
+        <div class="static-val" id="m-sheet-stock">招商银行 (sh600036)</div>
+      </div>
+      <div class="form-row">
+        <label>委托价格 (元)</label>
+        <div class="input-stepper">
+          <button type="button" class="step-btn" id="m-step-minus">-0.05</button>
+          <input type="number" step="0.01" id="m-sheet-price" class="sheet-input">
+          <button type="button" class="step-btn" id="m-step-plus">+0.05</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>委托数量 (股)</label>
+        <div class="shares-pill-row">
+          <button type="button" class="pill-share" data-shares="100">100股</button>
+          <button type="button" class="pill-share active" data-shares="500">500股</button>
+          <button type="button" class="pill-share" data-shares="1000">1000股</button>
+        </div>
+        <input type="number" step="100" id="m-sheet-shares" class="sheet-input" value="500" style="margin-top: 8px;">
+      </div>
+      <div class="sheet-estimate" id="m-sheet-estimate">预计金额: ¥0.00</div>
+      <button class="btn-sheet-submit" id="m-sheet-submit">确认提交委托</button>
+    </div>
+  </div>
+
+  <!-- 底部半屏推送设置抽屉 (Mobile Notify Bottom Sheet) -->
+  <div class="m-modal-mask" id="m-notify-mask"></div>
+  <div class="m-bottom-sheet" id="m-notify-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.2rem;">🔔</span>
+        <h3 id="m-notify-title" style="margin: 0; font-size: 1.05rem; color: #f8fafc;">飞书推送设置</h3>
+      </div>
+      <button class="sheet-close" id="m-notify-close">✕</button>
+    </div>
+    <div class="sheet-body" style="padding-bottom: 28px; max-height: 75vh; overflow-y: auto;">
+      <!-- 全局推送卡片 -->
+      <div class="m-setting-item" style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.5); padding: 12px 14px; border-radius: 12px; margin-bottom: 14px; border: 1px solid rgba(168, 85, 247, 0.3);">
+        <div>
+          <div style="font-size: 0.92rem; font-weight: 600; color: #f8fafc;">⚡ 飞书推送总开关</div>
+          <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">交易时段自动向飞书推送买卖信号</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="m-chk-global-push" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- 各股票配置列表 -->
+      <div style="font-size: 0.75rem; font-weight: 600; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase;">
+        各标的独立开关与过滤
+      </div>
+      <div id="m-notify-stocks-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+        <!-- 动态生成 -->
+      </div>
+
+      <button class="btn-sheet-submit" id="m-btn-save-notify" style="background: linear-gradient(135deg, #a855f7, #6366f1); border-color: #a855f7; margin-top: 10px;">
+        💾 保存推送设置并生效
+      </button>
+    </div>
+  </div>
+
+  <!-- 轻量 Toast 提示 -->
+  <div class="m-toast" id="m-toast"></div>
+
+  <script src="/static/mobile.js"></script>
+</body>
+</html>

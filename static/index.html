@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>招商银行 (600036) 5分钟量化买卖点分析工作台</title>
+  <meta name="description" content="招商银行5分钟量化买卖点历史数据规律分析与实时行情监控系统，集成SQLite数据库、技术指标计算与大盘联动分析。">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/libs/echarts.min.js"></script>
+</head>
+<body class="theme-dark">
+  <div class="app-layout">
+    <!-- 顶部导航栏 -->
+    <header class="app-header">
+      <div class="brand-area">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.2" fill="none">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+            <polyline points="16 7 22 7 22 13"></polyline>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 id="platform-title">银行股量化买卖点工作台</h1>
+          <span class="sub-title" id="platform-subtitle">招商银行 (600036.SH) & 平安银行 (000001.SZ) · 5分钟高频量化与实战决策</span>
+        </div>
+      </div>
+
+      <!-- 实时快照看板 -->
+      <div class="ticker-board">
+        <!-- 招商银行 -->
+        <div class="ticker-card" id="ticker-cmb">
+          <div class="ticker-meta">
+            <span class="ticker-name">招商银行</span>
+            <span class="ticker-code">600036.SH</span>
+          </div>
+          <div class="ticker-price-box">
+            <span class="ticker-price" id="cmb-price">--.--</span>
+            <span class="ticker-badge" id="cmb-pct">0.00%</span>
+          </div>
+          <div class="ticker-extra">
+            <span>高: <b id="cmb-high">--</b></span>
+            <span>低: <b id="cmb-low">--</b></span>
+          </div>
+        </div>
+
+        <!-- 平安银行 -->
+        <div class="ticker-card" id="ticker-pab">
+          <div class="ticker-meta">
+            <span class="ticker-name">平安银行</span>
+            <span class="ticker-code">000001.SZ</span>
+          </div>
+          <div class="ticker-price-box">
+            <span class="ticker-price" id="pab-price">--.--</span>
+            <span class="ticker-badge" id="pab-pct">0.00%</span>
+          </div>
+          <div class="ticker-extra">
+            <span>高: <b id="pab-high">--</b></span>
+            <span>低: <b id="pab-low">--</b></span>
+          </div>
+        </div>
+
+        <!-- 上证指数 -->
+        <div class="ticker-card" id="ticker-idx">
+          <div class="ticker-meta">
+            <span class="ticker-name">上证指数</span>
+            <span class="ticker-code">000001.SH</span>
+          </div>
+          <div class="ticker-price-box">
+            <span class="ticker-price" id="idx-price">--.--</span>
+            <span class="ticker-badge" id="idx-pct">0.00%</span>
+          </div>
+          <div class="ticker-extra">
+            <span>高: <b id="idx-high">--</b></span>
+            <span>低: <b id="idx-low">--</b></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧控制区 -->
+      <div class="header-actions">
+        <div class="sync-status-box">
+          <span class="pulse-indicator live" id="live-dot"></span>
+          <span class="status-text" id="sync-status">就绪</span>
+        </div>
+        <a href="/m" class="btn" title="查看专门适配触屏与单手操作的手机版" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); color: #f8fafc; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+          📱 手机版
+        </a>
+        <button id="btn-notify-settings" class="btn" title="按股票选择飞书推送与信号过滤" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc;">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            <circle cx="18" cy="4" r="3" fill="#c084fc"></circle>
+          </svg>
+          推送设置
+        </button>
+        <button id="btn-test-feishu" class="btn" title="向飞书推送一条实时测试预警卡片" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8;">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          飞书推送测试
+        </button>
+        <button id="btn-manual-sync" class="btn btn-primary" title="从公开接口增量拉取最新5分钟K线并写入数据库">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          增量同步API
+        </button>
+      </div>
+    </header>
+
+    <!-- 主控台区域 -->
+    <main class="main-container">
+      <!-- 实时买卖点决策指引看板 (最新K线与盘面行动指引) -->
+      <section class="action-decision-banner" id="action-banner">
+        <div class="decision-left">
+          <div class="decision-status-pill" id="decision-status-pill">
+            <span class="decision-dot" id="decision-dot"></span>
+            <span class="decision-status-text" id="decision-status-text">实时诊断中...</span>
+          </div>
+          <div class="decision-title-group">
+            <h3 class="decision-headline" id="decision-headline">正在评估最新盘面信号...</h3>
+            <p class="decision-subtext" id="decision-subtext">连接量化引擎与实时盘口...</p>
+          </div>
+        </div>
+        <div class="decision-right">
+          <div class="decision-plan-card" id="decision-plan-card">
+            <div class="plan-label">推荐交易执行计划</div>
+            <div class="plan-content" id="decision-plan-desc">止盈目标: -- | 严格止损: -- | 建议持有: -- 分钟</div>
+          </div>
+          <div class="decision-timing-tag" id="decision-timing-tag">
+            <span class="timing-badge" id="timing-badge">窗口评估中</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 策略与量化统计面板 -->
+      <section class="control-strip">
+        <div class="symbol-selector-group">
+          <label for="select-symbol" class="control-label">量化标的：</label>
+          <select id="select-symbol" class="custom-select" style="font-weight: 700; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">
+            <option value="sh600036" selected>招商银行 (600036.SH)</option>
+            <option value="sz000001">平安银行 (000001.SZ)</option>
+          </select>
+        </div>
+
+        <div class="strategy-selector-group">
+          <label for="select-strategy" class="control-label">买卖点策略方案：</label>
+          <select id="select-strategy" class="custom-select">
+            <optgroup label="🌟 严选推荐·正数学期望实战策略 (199天全量回测验证)">
+              <option value="boll_reversion" selected>🥇 布林带极值均值回归 (回测期望+0.082% · 尾盘胜率66.7% · 旗舰首选)</option>
+              <option value="hammer_reversal">🥈 底部锤子线形态反转 (午后高胜率窗口 · 盈亏比1.27 · 稳健型)</option>
+              <option value="vol_breakout">🥉 放量突破MA20 (回测胜率53.8% · 最大回撤仅6.4% · 动量突破)</option>
+              <option value="afternoon_confluence">🕒 午后多因子共振 (13:00~15:00专用 · 评分≥4.0精炼信号)</option>
+              <option value="combined">⚡ 全天候多因子共振 (布林+RSI+MACD共振 · 信号充沛)</option>
+            </optgroup>
+            <optgroup label="⚠️ 教学对照与实验组 (微负期望或高频易失真)">
+              <option value="rsi_extreme">🧪 RSI&lt;25 极值反转 (全量回测期望-0.008% · 实验观察)</option>
+              <option value="ma_cross">❌ 双均线金叉死叉 MA5/MA20 (5分钟高频易假突破 · 期望+0.003%)</option>
+              <option value="macd_cross">❌ MACD 动量金叉死叉 (5分钟延迟严重 · 仅供教学对照)</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="view-range-group">
+          <label for="select-limit" class="control-label">分析周期数据量：</label>
+          <select id="select-limit" class="custom-select">
+            <option value="500">最近 500 根 (约10交易日)</option>
+            <option value="1500" selected>最近 1500 根 (约1.5个月)</option>
+            <option value="3000">最近 3000 根 (约3个月)</option>
+            <option value="6000">最近 6000 根 (约6个月)</option>
+            <option value="10000">2026年全量 (9400+ 根/近10个月)</option>
+          </select>
+        </div>
+
+        <div class="indicator-toggles">
+          <label class="checkbox-label"><input type="checkbox" id="chk-boll" checked> BOLL通道</label>
+          <label class="checkbox-label"><input type="checkbox" id="chk-ma" checked> 均线(5/20/60)</label>
+          <label class="checkbox-label"><input type="checkbox" id="chk-signals" checked> 买卖点(B/S)</label>
+        </div>
+
+        <div class="sub-chart-switch">
+          <span class="control-label">副图指标:</span>
+          <button class="pill-btn active" data-sub="macd">MACD</button>
+          <button class="pill-btn" data-sub="rsi">RSI</button>
+          <button class="pill-btn" data-sub="index">上证指数联动</button>
+        </div>
+      </section>
+
+      <!-- 当前选中策略的核心机制说明条 -->
+      <section class="strategy-banner" id="strategy-banner">
+        <div class="strat-banner-tag" id="strat-banner-tag">旗舰策略·期望最高</div>
+        <div class="strat-banner-text" id="strat-banner-text">
+          布林下轨触底+RSI&lt;40共振买入，199天全量回测期望值+0.082%(八策略之冠)，胜率53.7%，尾盘(14:30~15:00)胜率达66.7%。
+        </div>
+        <div class="strat-banner-params" id="strat-banner-params">
+          <span>推荐止盈: <b>+1.2%</b></span>
+          <span>防守止损: <b>-0.8%</b></span>
+          <span>推荐持有时长: <b>120分钟 (24根K线)</b></span>
+        </div>
+      </section>
+
+      <!-- 策略统计与回测度量卡片 -->
+      <section class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-title">买入信号胜率 (30分钟/6K)</div>
+          <div class="metric-value highlight-green" id="stat-win30">--%</div>
+          <div class="metric-sub" id="stat-ret30">平均收益: --%</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">买入信号胜率 (60分钟/12K)</div>
+          <div class="metric-value highlight-green" id="stat-win60">--%</div>
+          <div class="metric-sub" id="stat-ret60">平均收益: --%</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">模拟盈亏比 (Profit/Loss)</div>
+          <div class="metric-value" id="stat-plr">--</div>
+          <div class="metric-sub">盈利均值 / 亏损均值</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">买卖信号触发总数</div>
+          <div class="metric-value" id="stat-signals-count">--</div>
+          <div class="metric-sub">
+            <span class="text-buy">买点(B): <b id="stat-buy-cnt">--</b></span> · 
+            <span class="text-sell">卖点(S): <b id="stat-sell-cnt">--</b></span>
+          </div>
+        </div>
+        <div class="metric-card db-card">
+          <div class="metric-title">SQLite 数据引擎</div>
+          <div class="metric-value text-accent" id="db-records-count">1,920 条</div>
+          <div class="metric-sub" id="db-time-range">2026-08-26 ~ 2026-10-29</div>
+        </div>
+      </section>
+
+      <!-- 图表主区域 -->
+      <section class="chart-layout">
+        <div class="chart-wrapper">
+          <div id="main-kline-chart" class="kline-canvas"></div>
+          <div class="chart-watermark">600036 · 5 MINUTE CANDLESTICK</div>
+        </div>
+      </section>
+
+      <!-- 模拟实操操作面板 (Paper Trading Console) -->
+      <section class="sim-trade-console" id="sim-console">
+        <div class="sim-console-header">
+          <div class="section-title">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <h2>模拟实操工作台 · 虚拟对冲账户</h2>
+            <span class="sim-badge-live">仿真 A 股交易环境 (含万2.5佣金+千0.5印花税)</span>
+          </div>
+          <div class="sim-header-actions">
+            <button id="btn-custom-holding" class="btn btn-secondary btn-sm" title="自定义设定初始底仓成本与股数">
+              ⚙️ 设定初始底仓
+            </button>
+            <button id="btn-sync-sim-price" class="btn btn-secondary btn-sm" title="同步最新实时价到下单板">
+              同步市价
+            </button>
+            <button id="btn-reset-sim" class="btn btn-danger-outline btn-sm" title="重置模拟账户初始资金为 10 万元">
+              重置账户 (¥10万)
+            </button>
+          </div>
+
+        </div>
+
+        <div class="sim-console-body">
+          <!-- 账户资产卡片 -->
+          <div class="sim-card sim-account-card">
+            <div class="sim-card-title">模拟账户资产概览</div>
+            <div class="sim-stats-row">
+              <div class="sim-stat-item">
+                <span class="sim-stat-label">总资产净值</span>
+                <span class="sim-stat-val" id="sim-total-assets">¥100,000.00</span>
+              </div>
+              <div class="sim-stat-item">
+                <span class="sim-stat-label">可用现金</span>
+                <span class="sim-stat-val" id="sim-cash">¥100,000.00</span>
+              </div>
+              <div class="sim-stat-item">
+                <span class="sim-stat-label">累计总收益</span>
+                <span class="sim-stat-val" id="sim-total-pnl">¥0.00 (0.00%)</span>
+              </div>
+            </div>
+
+            <div class="sim-pos-box">
+              <div class="sim-pos-header">
+                <span>标的持仓: <b>招商银行 (600036)</b></span>
+                <span id="sim-pos-tag" class="pos-status-tag empty">空仓</span>
+              </div>
+              <div class="sim-pos-grid">
+                <div>持仓股数: <b id="sim-shares">0 股</b></div>
+                <div>持仓均价: <b id="sim-avg-cost">¥0.00</b></div>
+                <div>持仓市值: <b id="sim-market-val">¥0.00</b></div>
+                <div>浮动盈亏: <b id="sim-unrealized-pnl">¥0.00 (0.00%)</b></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 下单操作面板 -->
+          <div class="sim-card sim-order-card">
+            <div class="sim-card-title">快捷交易委托</div>
+            
+            <div class="sim-form-grid">
+              <div class="sim-form-group">
+                <label>委托价格 (元):</label>
+                <div class="sim-input-wrap">
+                  <input type="number" id="sim-input-price" step="0.01" class="sim-input" placeholder="输入价格">
+                  <button id="btn-use-latest-price" class="btn-input-addon" title="填入当前最新价">现价</button>
+                </div>
+              </div>
+
+              <div class="sim-form-group">
+                <label>委托数量 (股/手):</label>
+                <div class="sim-input-wrap">
+                  <input type="number" id="sim-input-shares" step="100" min="100" value="500" class="sim-input" placeholder="100股的倍数">
+                </div>
+                <div class="sim-quick-chips">
+                  <button type="button" class="chip-qty" data-qty="100">100股</button>
+                  <button type="button" class="chip-qty" data-qty="300">300股</button>
+                  <button type="button" class="chip-qty" data-qty="500">500股</button>
+                  <button type="button" class="chip-qty" data-qty="1000">1000股</button>
+                  <button type="button" class="chip-qty" data-ratio="0.5">半仓</button>
+                  <button type="button" class="chip-qty" data-ratio="1.0">全仓</button>
+                </div>
+              </div>
+
+              <div class="sim-form-group full-width">
+                <label>交易备注 / 依据:</label>
+                <input type="text" id="sim-input-note" class="sim-input" placeholder="如：跟随午后黄金多因子买点 / 触及止盈">
+              </div>
+            </div>
+
+            <!-- 策略一键填充快捷条 -->
+            <div class="sim-strategy-quickfill" id="sim-quickfill-box">
+              <span class="quickfill-text">策略最新提示: <b id="quickfill-advice">正在检测...</b></span>
+              <button id="btn-fill-strategy-order" class="btn-quickfill">
+                ⚡ 载入策略推荐挂单
+              </button>
+            </div>
+
+            <!-- 操作按钮组 -->
+            <div class="sim-actions-row">
+              <button id="btn-sim-buy" class="btn-trade btn-trade-buy">
+                <span class="btn-trade-title">🟢 模拟买入 (BUY)</span>
+                <span class="btn-trade-sub" id="buy-estimate-sub">预计耗资: ¥--</span>
+              </button>
+
+              <button id="btn-sim-sell" class="btn-trade btn-trade-sell">
+                <span class="btn-trade-title">🔴 模拟卖出 (SELL)</span>
+                <span class="btn-trade-sub" id="sell-estimate-sub">可卖股数: 0 股</span>
+              </button>
+
+              <button id="btn-sim-close-all" class="btn btn-secondary btn-close-all" title="以现价平仓全部持仓">
+                一键清仓
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 模拟成交订单明细表格 -->
+        <div class="sim-trades-ledger">
+          <div class="ledger-header">
+            <h3>模拟交易订单流水 (<span id="sim-trades-count">0</span> 笔)</h3>
+            <span class="ledger-tip">真实核算买卖成交佣金 (万2.5) 与印花税 (千0.5)</span>
+          </div>
+          <div class="table-container ledger-table-container">
+            <table class="signals-table" id="sim-trades-table">
+              <thead>
+                <tr>
+                  <th>成交时间</th>
+                  <th>方向</th>
+                  <th>标的</th>
+                  <th>成交价</th>
+                  <th>成交股数</th>
+                  <th>成交金额</th>
+                  <th>手续费</th>
+                  <th>平仓盈亏</th>
+                  <th>交易备注</th>
+                </tr>
+              </thead>
+              <tbody id="sim-trades-tbody">
+                <tr><td colspan="9" class="loading-td">暂无模拟交易记录</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 信号日志与买卖点执行指导明细 -->
+      <section class="signals-section">
+
+        <div class="signals-header">
+          <div class="section-title">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <h2>买卖点触发明细 & 交易执行计划</h2>
+          </div>
+          <div class="signals-filter">
+            <button class="filter-chip active" data-filter="ALL">全部信号</button>
+            <button class="filter-chip" data-filter="BUY">仅买点 (B)</button>
+            <button class="filter-chip" data-filter="SELL">仅卖点 (S)</button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="signals-table" id="signals-table">
+            <thead>
+              <tr>
+                <th>时间 (5M)</th>
+                <th>类型</th>
+                <th>触发价</th>
+                <th>建议止损</th>
+                <th>目标止盈</th>
+                <th>建议持有</th>
+                <th>触发依据与逻辑</th>
+                <th>后续30m收益</th>
+                <th>后续60m收益</th>
+                <th>定位</th>
+              </tr>
+            </thead>
+            <tbody id="signals-tbody">
+              <tr>
+                <td colspan="10" class="loading-td">正在计算策略信号...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- 底部状态栏 -->
+    <footer class="app-footer">
+      <div class="footer-left">
+        <span>SQLite 数据库: <code>data/stock.db</code></span>
+        <span>存储标的: 招商银行 (sh600036) · 上证指数 (sh000001)</span>
+      </div>
+      <div class="footer-right">
+        <span>行情源: 新浪公开财经 / 东方财富 REST API</span>
+        <span id="last-refresh-time">更新时间: --:--:--</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- 飞书量化信号推送设置弹窗 -->
+  <div class="modal-backdrop" id="modal-notify-settings" style="display: none;">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <div class="modal-icon-badge" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(99, 102, 241, 0.3)); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc;">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="modal-title">飞书量化推送设置</h3>
+              <p class="modal-subtitle">按股票独立勾选推送并过滤买点/卖点信号，实时生效</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" id="btn-close-notify-modal" title="关闭弹窗">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- 全局开关卡片 -->
+          <div class="setting-card global-card">
+            <div class="setting-info">
+              <span class="setting-title">⚡ 飞书实时预警推送总开关</span>
+              <span class="setting-desc">关闭后后台仍正常计算信号，但暂停向飞书推送任何标的的实时卡片</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="chk-global-push" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- 各标的配置列表 -->
+          <div class="section-label-row">
+            <span class="section-label">标的股票推送与信号过滤</span>
+            <span class="section-tip">仅开启推送的股票才会向飞书发送卡片</span>
+          </div>
+
+          <div class="notify-stocks-list" id="notify-stocks-list">
+            <!-- 动态渲染各标的卡片 -->
+            <div class="notify-loading">正在读取配置...</div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <div class="modal-footer-status" id="modal-save-status">
+            <span class="status-dot-active"></span>
+            <span id="modal-status-text">配置自动持久化在 SQLite 中</span>
+          </div>
+          <div class="modal-footer-actions">
+            <button class="btn btn-secondary" id="btn-cancel-notify-settings">取消</button>
+            <button class="btn btn-primary" id="btn-save-notify-settings" style="background: linear-gradient(135deg, #a855f7, #6366f1); border-color: #a855f7;">
+              💾 保存并实时生效
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
