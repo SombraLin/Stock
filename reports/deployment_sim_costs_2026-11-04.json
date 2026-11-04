@@ -1,0 +1,48 @@
+{
+  "status": "deployed",
+  "backup": "/root/stock-backups/20261104-122500-sim-costs",
+  "migration": {
+    "policy": {
+      "version": "a_share_costs_v1",
+      "commission_rate": 0.00025,
+      "minimum_commission": 5.0,
+      "sell_stamp_tax_rate": 0.0005,
+      "transfer_rate_per_side": 1e-05,
+      "description": "佣金万2.5（每笔最低5元）＋卖出印花税0.05%＋双边过户费0.001%；金额四舍五入到分"
+    },
+    "trades": 6,
+    "old_cash": 79940.3775,
+    "new_cash": 79938.89,
+    "old_total_fees": 69.6225,
+    "new_total_fees": 71.11,
+    "old_positions": [
+      {
+        "symbol": "sh600036",
+        "shares": 500,
+        "avg_cost": 42.62565375,
+        "updated_at": "2026-11-04 10:51:28"
+      }
+    ],
+    "new_positions": {
+      "sh600036": {
+        "shares": 500,
+        "cost": 21313.04,
+        "avg_cost": 42.62608
+      }
+    }
+  },
+  "execution_identity_preserved": true,
+  "share_counts_preserved": true,
+  "market_data_preserved": true,
+  "files": {
+    "backend/database.py": "84a0cfd6e5b694cab1a1e716adabcef0c6068e7439e41ce27a1269c83c2e2529",
+    "backend/server.py": "e5ae4a358553a44812968fb9fc9ba22f143492932d2a9a3a878c4711492fd7dc",
+    "backend/sim_costs.py": "eb92fe0ea32ec3501e1b16a498cf887423e3e2f30672b18a536effae59ada792",
+    "static/index.html": "59121aa2ac661adbcca97ba389e1686197dc63f99db8d740313aa3212ef9936b",
+    "static/app.js": "5473e8b21f9763fb72c3bb429fbdba2814ca698575df8e42f1e592d7deb7801e",
+    "static/mobile.html": "62fa01ea317cb3f2d0c0f4c27baf99a7549b25521e242adf352a3ced631f3510",
+    "static/mobile.js": "0313f3f890a05dcac8cd415779cf567819a40ef39603630313dbd2e6ccdcd034",
+    "tests/test_sim_costs.py": "42fd3ad84ac14507c91be2ff77ae1daa12a23515bb9ad51ed2f7d3200149c04e",
+    "tests/test_recommendations.py": "3fd3898c52c82d15854e9f0e5bd43a3d548c3cc6d59747478b0cbc5d3ac5edf5"
+  }
+}

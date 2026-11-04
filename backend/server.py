@@ -92,9 +92,11 @@ async def api_notify_test(request: Request):
     signal_type = str(body.get("signal_type", "BUY")).upper()
     if signal_type not in ["BUY", "SELL"]:
         signal_type = "BUY"
-    stock_name = "平安银行" if symbol == "sz000001" else "招商银行"
+    stock_name_map = {"sh600036": "招商银行", "sz000001": "平安银行", "sh601012": "隆基绿能"}
+    stock_name = stock_name_map.get(symbol, symbol)
     quotes = fetch_realtime_quotes([symbol])
-    fallback_price = 42.94 if symbol == "sh600036" else 11.54
+    fallback_map = {"sh600036": 42.94, "sz000001": 11.54, "sh601012": 12.00}
+    fallback_price = fallback_map.get(symbol, 10.0)
     price = float(quotes.get(symbol, {}).get("price", fallback_price))
     
     is_buy = signal_type == "BUY"
@@ -133,7 +135,7 @@ async def api_recommendation_summary():
 @app.get("/api/quotes")
 async def api_quotes():
     """获取最新实时分时行情快照"""
-    quotes = fetch_realtime_quotes(["sh600036", "sz000001", "sh000001"])
+    quotes = fetch_realtime_quotes(["sh600036", "sz000001", "sh601012", "sh000001"])
     return JSONResponse(content={"status": "success", "data": quotes})
 
 @app.get("/api/klines")
@@ -249,6 +251,8 @@ async def api_sim_reset(request: Request):
         initial_cash = 100000.0
 
     res = reset_sim_account(initial_cash=initial_cash)
+    if res.get("status") == "error":
+        return JSONResponse(content=res, status_code=400)
     summary = get_sim_account_summary(current_price=0.0)
     res["account"] = summary
     return JSONResponse(content=res)
@@ -266,6 +270,8 @@ async def api_sim_set_holding(request: Request):
     initial_cash = float(body.get("initial_cash", 100000.0))
     
     res = set_initial_position(symbol=symbol, shares=shares, price=price, buy_date=buy_date, initial_cash=initial_cash)
+    if res.get("status") == "error":
+        return JSONResponse(content=res, status_code=400)
     quotes = fetch_realtime_quotes([symbol])
     current_price = price
     if symbol in quotes and quotes[symbol].get("price"):

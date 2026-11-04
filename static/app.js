@@ -1,10 +1,21 @@
-// 银行股 5分钟量化买卖点分析前端核心逻辑
+// 银行与成长股 5分钟量化买卖点分析前端核心逻辑
 
 let chart = null;
 let currentSymbol = 'sh600036';
 let currentAnalysisData = null;
 let currentSubIndicator = 'macd'; // 'macd' | 'rsi' | 'index'
 let currentFilter = 'ALL';
+
+const SYMBOL_NAMES = {
+  'sh600036': '招商银行',
+  'sz000001': '平安银行',
+  'sh601012': '隆基绿能',
+  'sh000001': '上证指数',
+  'sh510050': '上证50ETF'
+};
+function getStockName(sym) {
+  return SYMBOL_NAMES[sym] || sym;
+}
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -19,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const selSymbol = document.getElementById('select-symbol');
     if (selSymbol) {
       selSymbol.value = paramSymbol;
-      const symName = currentSymbol === 'sz000001' ? '平安银行' : '招商银行';
+      const symName = getStockName(currentSymbol);
       const chartTitle = document.querySelector('.panel-title');
       if (chartTitle) chartTitle.innerText = `${symName} 5分钟K线与量化决策分析`;
     }
@@ -69,7 +80,7 @@ function bindEvents() {
   if (selSymbol) {
     selSymbol.addEventListener('change', (e) => {
       currentSymbol = e.target.value;
-      const symName = currentSymbol === 'sz000001' ? '平安银行' : '招商银行';
+      const symName = getStockName(currentSymbol);
       const chartTitle = document.querySelector('.panel-title');
       if (chartTitle) {
         chartTitle.innerText = `${symName} 5分钟K线与量化决策分析`;
@@ -238,6 +249,7 @@ async function loadQuotes() {
       const quotes = json.data;
       updateTicker('cmb', quotes['sh600036']);
       updateTicker('pab', quotes['sz000001']);
+      updateTicker('longi', quotes['sh601012']);
       updateTicker('idx', quotes['sh000001']);
 
       const now = new Date();
@@ -1001,7 +1013,11 @@ function updateOrderEstimate() {
   const sellSub = document.getElementById('sell-estimate-sub');
 
   if (buySub) {
-    const cost = (p * s * 1.00025);
+    const policy = currentSimData?.cost_policy || {};
+    const amount = Math.round(p * s * 100) / 100;
+    const commission = Math.round(Math.max(policy.minimum_commission ?? 5, amount * (policy.commission_rate ?? 0.00025)) * 100) / 100;
+    const transfer = Math.round(amount * (policy.transfer_rate_per_side ?? 0.00001) * 100) / 100;
+    const cost = amount + commission + transfer;
     buySub.innerText = `预计耗资: ¥${cost.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
   if (sellSub && currentSimData && currentSimData.position) {
@@ -1033,6 +1049,12 @@ function renderSimAccount(data) {
   // 资产概览
   document.getElementById('sim-total-assets').innerText = `¥${data.total_assets.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}`;
   document.getElementById('sim-cash').innerText = `¥${data.cash.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}`;
+  const feesElem = document.getElementById('sim-total-fees');
+  if (feesElem) {
+    const fees = data.fee_breakdown || {};
+    feesElem.innerText = `累计费用 ¥${(data.total_fees || 0).toFixed(2)} · 佣金 ¥${(fees.commission || 0).toFixed(2)} · 印花税 ¥${(fees.stamp_tax || 0).toFixed(2)} · 过户费 ¥${(fees.transfer_fee || 0).toFixed(2)}`;
+    feesElem.title = data.cost_policy?.description || '';
+  }
 
   const pnlElem = document.getElementById('sim-total-pnl');
   const isUp = data.total_pnl >= 0;
@@ -1099,11 +1121,11 @@ function renderSimTradesTable(trades) {
             ${isBuy ? '🟢 买入' : '🔴 卖出'}
           </span>
         </td>
-        <td>招商银行</td>
+        <td>${getStockName(t.symbol)}</td>
         <td style="font-family:var(--font-mono); font-weight:700;">¥${t.price.toFixed(2)}</td>
         <td style="font-family:var(--font-mono); font-weight:600;">${t.shares} 股</td>
         <td style="font-family:var(--font-mono);">¥${t.amount.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</td>
-        <td style="font-family:var(--font-mono); font-size:11px; color:#94a3b8;">¥${t.fee.toFixed(2)}</td>
+        <td title="佣金 ¥${(t.commission || 0).toFixed(2)} / 印花税 ¥${(t.stamp_tax || 0).toFixed(2)} / 过户费 ¥${(t.transfer_fee || 0).toFixed(2)}" style="font-family:var(--font-mono); font-size:11px; color:#94a3b8;">¥${t.fee.toFixed(2)}</td>
         <td style="font-family:var(--font-mono); font-weight:700; color:${t.type==='SELL' ? (isProfit?'var(--up-color)':'var(--down-color)') : '#64748b'}">
           ${t.type === 'SELL' ? `${isProfit?'+':''}¥${t.pnl.toFixed(2)}` : '--'}
         </td>

@@ -1,0 +1,123 @@
+{
+  "cost_policy": {
+    "version": "a_share_costs_v1",
+    "commission_rate": 0.00025,
+    "minimum_commission": 5.0,
+    "sell_stamp_tax_rate": 0.0005,
+    "transfer_rate_per_side": 1e-05,
+    "description": "佣金万2.5（每笔最低5元）＋卖出印花税0.05%＋双边过户费0.001%；金额四舍五入到分"
+  },
+  "total_fees": 71.11,
+  "fee_breakdown": {
+    "commission": 37.32,
+    "stamp_tax": 32.31,
+    "transfer_fee": 1.48
+  },
+  "realized_pnl": 1251.93,
+  "cash": 79938.89,
+  "initial_cash": 100000.0,
+  "total_assets": 101458.89,
+  "total_pnl": 1458.89,
+  "total_pnl_pct": 1.46,
+  "position": {
+    "symbol": "sh600036",
+    "shares": 500,
+    "avg_cost": 42.63,
+    "market_value": 21520.0,
+    "unrealized_pnl": 206.96,
+    "unrealized_pnl_pct": 0.97,
+    "current_price": 43.04
+  },
+  "trades": [
+    {
+      "id": 9,
+      "symbol": "sh600036",
+      "type": "SELL",
+      "shares": 500,
+      "price": 42.87,
+      "amount": 21435.0,
+      "fee": 16.29,
+      "pnl": 105.67,
+      "commission": 5.36,
+      "stamp_tax": 10.72,
+      "transfer_fee": 0.21,
+      "created_at": "2026-11-04 10:51:28",
+      "note": "手动模拟卖出"
+    },
+    {
+      "id": 8,
+      "symbol": "sh600036",
+      "type": "BUY",
+      "shares": 500,
+      "price": 42.39,
+      "amount": 21195.0,
+      "fee": 5.51,
+      "pnl": 0.0,
+      "commission": 5.3,
+      "stamp_tax": 0.0,
+      "transfer_fee": 0.21,
+      "created_at": "2026-11-03 14:27:32",
+      "note": "手动模拟买入"
+    },
+    {
+      "id": 7,
+      "symbol": "sh600036",
+      "type": "BUY",
+      "shares": 500,
+      "price": 42.84,
+      "amount": 21420.0,
+      "fee": 5.57,
+      "pnl": 0.0,
+      "commission": 5.36,
+      "stamp_tax": 0.0,
+      "transfer_fee": 0.21,
+      "created_at": "2026-11-02 13:56:38",
+      "note": "手动模拟买入"
+    },
+    {
+      "id": 6,
+      "symbol": "sh600036",
+      "type": "SELL",
+      "shares": 500,
+      "price": 43.41,
+      "amount": 21705.0,
+      "fee": 16.5,
+      "pnl": 683.04,
+      "commission": 5.43,
+      "stamp_tax": 10.85,
+      "transfer_fee": 0.22,
+      "created_at": "2026-10-30 14:22:34",
+      "note": "移动端快捷下单"
+    },
+    {
+      "id": 5,
+      "symbol": "sh600036",
+      "type": "SELL",
+      "shares": 500,
+      "price": 42.97,
+      "amount": 21485.0,
+      "fee": 16.32,
+      "pnl": 463.22,
+      "commission": 5.37,
+      "stamp_tax": 10.74,
+      "transfer_fee": 0.21,
+      "created_at": "2026-10-29 14:52:19",
+      "note": "策略【午后黄金多因子策略】推荐：🔴 刚刚触发减仓/卖出信号！"
+    },
+    {
+      "id": 4,
+      "symbol": "sh600036",
+      "type": "BUY",
+      "shares": 1000,
+      "price": 42.0,
+      "amount": 42000.0,
+      "fee": 10.92,
+      "pnl": 0.0,
+      "commission": 10.5,
+      "stamp_tax": 0.0,
+      "transfer_fee": 0.42,
+      "created_at": "2026-10-28 14:30:00",
+      "note": "初始底仓 (昨日42元建仓1000股)"
+    }
+  ]
+}

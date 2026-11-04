@@ -1,0 +1,22 @@
+{
+  "status": "deployed",
+  "backup": "/root/stock-backups/20261104-115648",
+  "stage": "/root/Stock/.deploy/20261104-115648",
+  "account_preserved": true,
+  "files": {
+    "backend/server.py": "8e069388222b6358bd1228c277d4e25f8c94ae436bff961e24b6fc1fc64b26bb",
+    "backend/scheduler.py": "5d043d0f738f14c6895356a0d236751f5df81408586e468f7dba14252d4823a7",
+    "backend/recommendations.py": "e93717060a2f1ced018b7ae5d290cfa629e6c206164dc7a7b8a161f086cd4ea4",
+    "backend/research_audit.py": "2655642549637b0ce39d9b4c1ee151aaaa88ab8c5828c566f25b34dbddc25370",
+    "tests/test_recommendations.py": "3fd3898c52c82d15854e9f0e5bd43a3d548c3cc6d59747478b0cbc5d3ac5edf5",
+    "reports/算法审计与优化路线_2026-11-04.md": "2b71b8eaa9ae6e65dc48aace6e01bc09f89560406541be3ecd42ad96d02681d2",
+    "reports/recommendation_performance_2026-11-04.json": "de3e7965c138ccf592f68d05f906d6ee168fb96330e7d7827823ea5ae5432e6d"
+  },
+  "recommendations": [
+    [
+      "historical_replay",
+      976
+    ]
+  ],
+  "outcomes": 4404
+}

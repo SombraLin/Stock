@@ -216,7 +216,7 @@ if __name__ == '__main__':
     if args.replay or args.evaluate:
         now = china_now()
         idx = closed_bars(query_klines('sh510050', limit=None), now)
-        for symbol in ['sh600036', 'sz000001']:
+        for symbol in ['sh600036', 'sz000001', 'sh601012']:
             rows = closed_bars(query_klines(symbol, limit=None), now)
             if args.replay:
                 result = generate_signals(pd.DataFrame(rows), pd.DataFrame(idx), 'boll_reversion')

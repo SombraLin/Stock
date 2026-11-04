@@ -52,6 +52,16 @@
         <span class="sym-pct" id="pab-live-pct">0.00%</span>
       </div>
     </button>
+    <button class="m-sym-tab" data-symbol="sh601012" id="tab-longi">
+      <div class="sym-name-row">
+        <span class="sym-icon">☀️</span>
+        <span class="sym-title">隆基绿能</span>
+      </div>
+      <div class="sym-price-row">
+        <span class="sym-price" id="longi-live-price">--.--</span>
+        <span class="sym-pct" id="longi-live-pct">0.00%</span>
+      </div>
+    </button>
   </section>
 
   <!-- 主体滚动区域 -->
@@ -146,10 +156,11 @@
           <b class="acc-val" id="m-acc-shares">0 股</b>
         </div>
         <div class="acc-box">
-          <span class="acc-lbl">浮动盈亏</span>
+          <span class="acc-lbl">总收益（已扣费用）</span>
           <b class="acc-val up" id="m-acc-pnl">+¥0.00 (0.00%)</b>
         </div>
       </div>
+      <p id="m-acc-fees" style="font-size:11px;color:#94a3b8;line-height:1.6;margin:10px 0 0;">累计交易费用：--</p>
     </section>
 
     <div style="height: 100px;"></div> <!-- 底部操作栏占位垫片 -->
@@ -252,6 +263,6 @@
   <!-- 轻量 Toast 提示 -->
   <div class="m-toast" id="m-toast"></div>
 
-  <script src="/static/mobile.js"></script>
+  <script src="/static/mobile.js?v=20261104-costs1"></script>
 </body>
 </html>

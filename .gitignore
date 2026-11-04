@@ -8,3 +8,4 @@ __pycache__/
 .vscode/
 *.log
 data/recommendations.db*
+data/backups/

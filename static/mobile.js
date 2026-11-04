@@ -8,6 +8,17 @@ let currentPrice = 0.0;
 let currentPosShares = 0;
 let tradeActionType = 'BUY'; // 'BUY' | 'SELL'
 
+const SYMBOL_NAMES = {
+  'sh600036': '招商银行',
+  'sz000001': '平安银行',
+  'sh601012': '隆基绿能',
+  'sh000001': '上证指数',
+  'sh510050': '上证50ETF'
+};
+function getStockName(sym) {
+  return SYMBOL_NAMES[sym] || sym;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // 解析移动端 URL 直达参数
   const urlParams = new URLSearchParams(window.location.search);
@@ -17,8 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (paramSymbol) {
     currentSymbol = paramSymbol;
-    const isCMB = currentSymbol === 'sh600036';
-    const symName = isCMB ? '招商银行' : '平安银行';
+    const symName = getStockName(currentSymbol);
     const symNameElem = document.getElementById('m-chart-symbol-name');
     if (symNameElem) symNameElem.innerText = symName;
     const footerSym = document.getElementById('m-footer-sym');
@@ -80,10 +90,10 @@ function bindMobileEvents() {
       btn.classList.add('active');
       currentSymbol = btn.getAttribute('data-symbol');
       
-      const isCMB = currentSymbol === 'sh600036';
-      document.getElementById('m-chart-symbol-name').innerText = isCMB ? '招商银行' : '平安银行';
-      document.getElementById('m-footer-sym').innerText = isCMB ? '招商银行' : '平安银行';
-      document.getElementById('m-sheet-stock').innerText = `${isCMB ? '招商银行' : '平安银行'} (${currentSymbol})`;
+      const symName = getStockName(currentSymbol);
+      document.getElementById('m-chart-symbol-name').innerText = symName;
+      document.getElementById('m-footer-sym').innerText = symName;
+      document.getElementById('m-sheet-stock').innerText = `${symName} (${currentSymbol})`;
 
       loadMobileData();
       loadSimAccount();
@@ -407,19 +417,27 @@ async function loadQuotes() {
       const quotes = json.data;
       const cmb = quotes['sh600036'];
       const pab = quotes['sz000001'];
+      const longi = quotes['sh601012'];
 
-      if (cmb) {
+      if (cmb && document.getElementById('cmb-live-price')) {
         document.getElementById('cmb-live-price').innerText = cmb.price.toFixed(2);
         const isUp = cmb.change >= 0;
         document.getElementById('cmb-live-pct').innerText = `${isUp ? '+' : ''}${cmb.change_pct.toFixed(2)}%`;
         document.getElementById('cmb-live-pct').className = `sym-pct ${isUp ? 'is-up' : 'is-down'}`;
       }
 
-      if (pab) {
+      if (pab && document.getElementById('pab-live-price')) {
         document.getElementById('pab-live-price').innerText = pab.price.toFixed(2);
         const isUp = pab.change >= 0;
         document.getElementById('pab-live-pct').innerText = `${isUp ? '+' : ''}${pab.change_pct.toFixed(2)}%`;
         document.getElementById('pab-live-pct').className = `sym-pct ${isUp ? 'is-up' : 'is-down'}`;
+      }
+
+      if (longi && document.getElementById('longi-live-price')) {
+        document.getElementById('longi-live-price').innerText = longi.price.toFixed(2);
+        const isUp = longi.change >= 0;
+        document.getElementById('longi-live-pct').innerText = `${isUp ? '+' : ''}${longi.change_pct.toFixed(2)}%`;
+        document.getElementById('longi-live-pct').className = `sym-pct ${isUp ? 'is-up' : 'is-down'}`;
       }
 
       const activeQuote = quotes[currentSymbol];
@@ -452,6 +470,11 @@ async function loadSimAccount() {
       const isUp = d.total_pnl >= 0;
       pnlElem.innerText = `${isUp ? '+' : ''}¥${d.total_pnl.toFixed(2)} (${isUp ? '+' : ''}${d.total_pnl_pct.toFixed(2)}%)`;
       pnlElem.className = `acc-val ${isUp ? 'up' : 'down'}`;
+      const feesElem = document.getElementById('m-acc-fees');
+      if (feesElem) {
+        feesElem.innerText = `累计费用 ¥${(d.total_fees || 0).toFixed(2)} · 已计入资金与持仓成本`;
+        feesElem.title = d.cost_policy?.description || '';
+      }
 
       document.getElementById('m-sell-sub').innerText = currentPosShares > 0 ? `可卖${currentPosShares}股` : '暂无持仓';
     }

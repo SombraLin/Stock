@@ -1,0 +1,30 @@
+{
+  "policy": {
+    "version": "a_share_costs_v1",
+    "commission_rate": 0.00025,
+    "minimum_commission": 5.0,
+    "sell_stamp_tax_rate": 0.0005,
+    "transfer_rate_per_side": 1e-05,
+    "description": "佣金万2.5（每笔最低5元）＋卖出印花税0.05%＋双边过户费0.001%；金额四舍五入到分"
+  },
+  "trades": 2,
+  "old_cash": 79458.38625,
+  "new_cash": 79457.76,
+  "old_total_fees": 26.61375,
+  "new_total_fees": 27.24,
+  "old_positions": [
+    {
+      "symbol": "sh600036",
+      "shares": 500,
+      "avg_cost": 42.0,
+      "updated_at": "2026-10-29 14:52:19"
+    }
+  ],
+  "new_positions": {
+    "sh600036": {
+      "shares": 500,
+      "cost": 21005.46,
+      "avg_cost": 42.01092
+    }
+  }
+}
