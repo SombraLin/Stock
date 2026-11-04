@@ -16,6 +16,7 @@ from backend.fetcher import sync_symbol_5m_data, fetch_realtime_quotes
 from backend.strategy import generate_signals
 from backend.scheduler import trading_sync_worker, get_scheduler_status, do_sync_all_symbols
 from backend.notifier import send_signal_alert
+from backend.recommendations import closed_bars, recent as recent_recommendations, performance
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
@@ -118,6 +119,17 @@ async def api_stats():
     stats = get_data_stats()
     return JSONResponse(content={"status": "success", "data": stats})
 
+
+@app.get("/api/recommendations")
+async def api_recommendations(limit: int = Query(50, ge=1, le=500)):
+    """Immutable observations and separate T+1/inventory hypothetical outcomes."""
+    return {"status": "success", "data": recent_recommendations(limit)}
+
+
+@app.get("/api/recommendations/summary")
+async def api_recommendation_summary():
+    return {"status": "success", "data": performance(), "note": "假设成交评估；历史回放与实时推荐、买点与卖点、T+1与底仓做T分别统计"}
+
 @app.get("/api/quotes")
 async def api_quotes():
     """获取最新实时分时行情快照"""
@@ -140,10 +152,10 @@ async def api_analysis(symbol: str = "sh600036", strategy: str = "boll_reversion
     """
     运行策略量化分析并返回包含技术指标、买卖点信号与回测评估结果，以及针对最新盘面的交易提示
     """
-    stock_rows = query_klines(symbol, limit=limit)
-    idx_rows = query_klines("sh510050", limit=limit)
+    stock_rows = closed_bars(query_klines(symbol, limit=limit))
+    idx_rows = closed_bars(query_klines("sh510050", limit=limit))
     if not idx_rows:
-        idx_rows = query_klines("sh000001", limit=limit)
+        idx_rows = closed_bars(query_klines("sh000001", limit=limit))
     
     if not stock_rows:
         return JSONResponse(content={"status": "error", "message": f"No stock data available for {symbol}"}, status_code=400)

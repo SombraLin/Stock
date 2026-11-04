@@ -8,6 +8,7 @@ from backend.fetcher import sync_symbol_5m_data
 from backend.database import query_klines, is_signal_notified, record_signal_notification, get_push_settings
 from backend.strategy import generate_signals
 from backend.notifier import send_signal_alert
+from backend.recommendations import closed_bars, china_now, record, evaluate
 
 logger = logging.getLogger("scheduler")
 logger.setLevel(logging.INFO)
@@ -70,9 +71,10 @@ def check_and_notify_signals() -> List[Dict[str, Any]]:
 
     alerts_triggered = []
     # 获取基准
-    idx_rows = query_klines("sh510050", limit=200)
+    now = china_now()
+    idx_rows = closed_bars(query_klines("sh510050", limit=200), now)
     if not idx_rows:
-        idx_rows = query_klines("sh000001", limit=200)
+        idx_rows = closed_bars(query_klines("sh000001", limit=200), now)
     idx_df = pd.DataFrame(idx_rows) if idx_rows else None
 
     for sym, stock_name in MONITOR_TARGETS:
@@ -82,7 +84,7 @@ def check_and_notify_signals() -> List[Dict[str, Any]]:
             if not cfg.get("enabled", True):
                 continue
 
-            stock_rows = query_klines(sym, limit=200)
+            stock_rows = closed_bars(query_klines(sym, limit=200), now)
             if not stock_rows or len(stock_rows) < 30:
                 continue
             
@@ -113,6 +115,8 @@ def check_and_notify_signals() -> List[Dict[str, Any]]:
             # 检查是否属于最近走完的 3 根K线内（避免冷启动重推很久以前的历史旧信号）
             recent_times = [r["datetime"] for r in stock_rows[-3:]]
             if sig_time not in recent_times:
+                continue
+            if (now - datetime.fromisoformat(str(sig_time))).total_seconds() > 20 * 60:
                 continue
 
             # 数据库幂等排重检测
@@ -153,6 +157,26 @@ def check_and_notify_signals() -> List[Dict[str, Any]]:
 
     return alerts_triggered
 
+
+def track_recommendations():
+    """Always journal recommendations, even when push is disabled or delivery fails."""
+    now = china_now()
+    idx_rows = closed_bars(query_klines("sh510050", limit=200), now)
+    if not idx_rows:
+        idx_rows = closed_bars(query_klines("sh000001", limit=200), now)
+    for symbol, _ in MONITOR_TARGETS:
+        try:
+            rows = closed_bars(query_klines(symbol, limit=200), now)
+            if len(rows) < 60:
+                continue
+            result = generate_signals(pd.DataFrame(rows), pd.DataFrame(idx_rows) if idx_rows else None,
+                                      strategy_name="boll_reversion")
+            record(symbol, result, rows, idx_rows, now=now)
+            # Existing events need a history longer than the live signal warmup.
+            evaluate(symbol, query_klines(symbol, limit=None), now=now)
+        except Exception:
+            logger.exception("推荐点记录/评估失败: %s", symbol)
+
 def do_sync_all_symbols(datalen: int = 60) -> Dict[str, int]:
     """同步所有监控标的的最新5分钟K线并触发信号扫描"""
     results = {}
@@ -165,6 +189,7 @@ def do_sync_all_symbols(datalen: int = 60) -> Dict[str, int]:
             print(f"[Scheduler] 同步 {sym} ({name}) 出错: {e}")
     
     # 同步落库后，立即执行买卖点信号扫描
+    track_recommendations()
     try:
         check_and_notify_signals()
     except Exception as e:

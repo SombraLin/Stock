@@ -1,0 +1,282 @@
+[
+  {
+    "symbol": "sh600036",
+    "strategy": "boll_reversion",
+    "version": "6e0f039db4845ce4067f78ef25c533a73dd460d50b280c1c8f2a678cb338bcd4",
+    "origin": "historical_replay",
+    "side": "BUY",
+    "mode": "inventory",
+    "horizon": 6,
+    "metrics": {
+      "n": 208,
+      "signal_days": 139,
+      "mean_pct": -0.17344184009927666,
+      "median_pct": -0.20182158935526662,
+      "win_rate_pct": 22.115384615384613,
+      "day_cluster_ci95": [
+        -0.22170437873903623,
+        -0.12436882490495305
+      ]
+    }
+  },
+  {
+    "symbol": "sh600036",
+    "strategy": "boll_reversion",
+    "version": "6e0f039db4845ce4067f78ef25c533a73dd460d50b280c1c8f2a678cb338bcd4",
+    "origin": "historical_replay",
+    "side": "BUY",
+    "mode": "inventory",
+    "horizon": 12,
+    "metrics": {
+      "n": 176,
+      "signal_days": 125,
+      "mean_pct": -0.1900553270135841,
+      "median_pct": -0.22740904924264393,
+      "win_rate_pct": 23.295454545454543,
+      "day_cluster_ci95": [
+        -0.25724339249023737,
+        -0.11243919814232382
+      ]
+    }
+  },
+  {
+    "symbol": "sh600036",
+    "strategy": "boll_reversion",
+    "version": "6e0f039db4845ce4067f78ef25c533a73dd460d50b280c1c8f2a678cb338bcd4",
+    "origin": "historical_replay",
+    "side": "BUY",
+    "mode": "new_position_t1",
+    "horizon": 12,
+    "metrics": {
+      "n": 235,
+      "signal_days": 149,
+      "mean_pct": -0.17621540291503132,
+      "median_pct": -0.1534345937622028,
+      "win_rate_pct": 35.74468085106383,
+      "day_cluster_ci95": [
+        -0.2863876559252813,
+        -0.05923201548355524
+      ]
+    }
+  },
+  {
+    "symbol": "sh600036",
+    "strategy": "boll_reversion",
+    "version": "6e0f039db4845ce4067f78ef25c533a73dd460d50b280c1c8f2a678cb338bcd4",
+    "origin": "historical_replay",
+    "side": "BUY",
+    "mode": "inventory",
+    "horizon": 24,
+    "metrics": {
+      "n": 114,
+      "signal_days": 96,
+      "mean_pct": -0.20498868221505026,
+      "median_pct": -0.26331821996792293,
+      "win_rate_pct": 31.57894736842105,
+      "day_cluster_ci95": [
+        -0.3342719154312382,
+        -0.07197274579459711
+      ]
+    }
+  },
+  {
+    "symbol": "sh600036",
+    "strategy": "boll_reversion",
+    "version": "6e0f039db4845ce4067f78ef25c533a73dd460d50b280c1c8f2a678cb338bcd4",
+    "origin": "historical_replay",
+    "side": "SELL",
+    "mode": "inventory",
+    "horizon": 6,
+    "metrics": {
+      "n": 213,
+      "signal_days": 142,
+      "mean_pct": -0.22924592856694884,
+      "median_pct": -0.22738790325037422,
+      "win_rate_pct": 21.12676056338028,
+      "day_cluster_ci95": [
+        -0.27208083142876255,
+        -0.18477266425342992
+      ]
+    }
+  },
+  {
+    "symbol": "sh600036",
+    "strategy": "boll_reversion",
+    "version": "6e0f039db4845ce4067f78ef25c533a73dd460d50b280c1c8f2a678cb338bcd4",
+    "origin": "historical_replay",
+    "side": "SELL",
+    "mode": "inventory",
+    "horizon": 12,
+    "metrics": {
+      "n": 188,
+      "signal_days": 131,
+      "mean_pct": -0.20298621983667225,
+      "median_pct": -0.17768169689170127,
+      "win_rate_pct": 29.78723404255319,
+      "day_cluster_ci95": [
+        -0.26188436532459036,
+        -0.13537613054828448
+      ]
+    }
+  },
+  {
+    "symbol": "sh600036",
+    "strategy": "boll_reversion",
+    "version": "6e0f039db4845ce4067f78ef25c533a73dd460d50b280c1c8f2a678cb338bcd4",
+    "origin": "historical_replay",
+    "side": "SELL",
+    "mode": "inventory",
+    "horizon": 24,
+    "metrics": {
+      "n": 115,
+      "signal_days": 95,
+      "mean_pct": -0.16368021657470405,
+      "median_pct": -0.1252295912576922,
+      "win_rate_pct": 36.52173913043478,
+      "day_cluster_ci95": [
+        -0.30691530190046806,
+        -0.006988283347502489
+      ]
+    }
+  },
+  {
+    "symbol": "sz000001",
+    "strategy": "boll_reversion",
+    "version": "6e0f039db4845ce4067f78ef25c533a73dd460d50b280c1c8f2a678cb338bcd4",
+    "origin": "historical_replay",
+    "side": "SELL",
+    "mode": "inventory",
+    "horizon": 6,
+    "metrics": {
+      "n": 199,
+      "signal_days": 129,
+      "mean_pct": -0.23470361156630232,
+      "median_pct": -0.24126071428570736,
+      "win_rate_pct": 19.597989949748744,
+      "day_cluster_ci95": [
+        -0.27933884947394605,
+        -0.18904997414338784
+      ]
+    }
+  },
+  {
+    "symbol": "sz000001",
+    "strategy": "boll_reversion",
+    "version": "6e0f039db4845ce4067f78ef25c533a73dd460d50b280c1c8f2a678cb338bcd4",
+    "origin": "historical_replay",
+    "side": "SELL",
+    "mode": "inventory",
+    "horizon": 12,
+    "metrics": {
+      "n": 172,
+      "signal_days": 118,
+      "mean_pct": -0.2693988536396929,
+      "median_pct": -0.24647414116037464,
+      "win_rate_pct": 28.488372093023255,
+      "day_cluster_ci95": [
+        -0.344185817088985,
+        -0.18979996558986756
+      ]
+    }
+  },
+  {
+    "symbol": "sz000001",
+    "strategy": "boll_reversion",
+    "version": "6e0f039db4845ce4067f78ef25c533a73dd460d50b280c1c8f2a678cb338bcd4",
+    "origin": "historical_replay",
+    "side": "SELL",
+    "mode": "inventory",
+    "horizon": 24,
+    "metrics": {
+      "n": 118,
+      "signal_days": 94,
+      "mean_pct": -0.2459886628731765,
+      "median_pct": -0.2428428061266543,
+      "win_rate_pct": 38.983050847457626,
+      "day_cluster_ci95": [
+        -0.36643070988497356,
+        -0.12498893377951738
+      ]
+    }
+  },
+  {
+    "symbol": "sz000001",
+    "strategy": "boll_reversion",
+    "version": "6e0f039db4845ce4067f78ef25c533a73dd460d50b280c1c8f2a678cb338bcd4",
+    "origin": "historical_replay",
+    "side": "BUY",
+    "mode": "inventory",
+    "horizon": 6,
+    "metrics": {
+      "n": 231,
+      "signal_days": 140,
+      "mean_pct": -0.22560396729480595,
+      "median_pct": -0.2423213780295974,
+      "win_rate_pct": 19.913419913419915,
+      "day_cluster_ci95": [
+        -0.26459997887950487,
+        -0.18575181990318976
+      ]
+    }
+  },
+  {
+    "symbol": "sz000001",
+    "strategy": "boll_reversion",
+    "version": "6e0f039db4845ce4067f78ef25c533a73dd460d50b280c1c8f2a678cb338bcd4",
+    "origin": "historical_replay",
+    "side": "BUY",
+    "mode": "inventory",
+    "horizon": 12,
+    "metrics": {
+      "n": 194,
+      "signal_days": 135,
+      "mean_pct": -0.2310651483994904,
+      "median_pct": -0.32289179356796427,
+      "win_rate_pct": 21.1340206185567,
+      "day_cluster_ci95": [
+        -0.2891402698020956,
+        -0.1724704772818647
+      ]
+    }
+  },
+  {
+    "symbol": "sz000001",
+    "strategy": "boll_reversion",
+    "version": "6e0f039db4845ce4067f78ef25c533a73dd460d50b280c1c8f2a678cb338bcd4",
+    "origin": "historical_replay",
+    "side": "BUY",
+    "mode": "new_position_t1",
+    "horizon": 12,
+    "metrics": {
+      "n": 272,
+      "signal_days": 148,
+      "mean_pct": -0.3525369555220184,
+      "median_pct": -0.33605745281133914,
+      "win_rate_pct": 24.264705882352942,
+      "day_cluster_ci95": [
+        -0.44534420732139496,
+        -0.2571728192219833
+      ]
+    }
+  },
+  {
+    "symbol": "sz000001",
+    "strategy": "boll_reversion",
+    "version": "6e0f039db4845ce4067f78ef25c533a73dd460d50b280c1c8f2a678cb338bcd4",
+    "origin": "historical_replay",
+    "side": "BUY",
+    "mode": "inventory",
+    "horizon": 24,
+    "metrics": {
+      "n": 125,
+      "signal_days": 107,
+      "mean_pct": -0.2988932769136097,
+      "median_pct": -0.33571829980625356,
+      "win_rate_pct": 24.8,
+      "day_cluster_ci95": [
+        -0.39684426567959713,
+        -0.19523672641820786
+      ]
+    }
+  }
+]
