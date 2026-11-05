@@ -44,6 +44,27 @@ def init_db():
         ON kline_5m (symbol, datetime ASC)
         """)
 
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS kline_daily (
+            symbol TEXT NOT NULL,
+            date TEXT NOT NULL,
+            open REAL NOT NULL,
+            high REAL NOT NULL,
+            low REAL NOT NULL,
+            close REAL NOT NULL,
+            volume REAL NOT NULL,
+            amount REAL NOT NULL,
+            turnover REAL DEFAULT 0.0,
+            pct_change REAL DEFAULT 0.0,
+            PRIMARY KEY (symbol, date)
+        )
+        """)
+
+        cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_kline_daily_sym_date
+        ON kline_daily (symbol, date ASC)
+        """)
+
         # 预插入默认标的
         cursor.execute("""
         INSERT OR IGNORE INTO stocks (symbol, name, market) VALUES
@@ -358,6 +379,88 @@ def query_klines(symbol: str, limit: Optional[int] = 2000, start_time: Optional[
     conn.close()
     return [dict(r) for r in rows]
 
+def upsert_daily_klines(symbol: str, records: List[Dict[str, Any]]) -> int:
+    """批量插入或更新日K线数据，支持幂等写入"""
+    if not records:
+        return 0
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    rows = [
+        (
+            symbol,
+            r["date"],
+            float(r["open"]),
+            float(r["high"]),
+            float(r["low"]),
+            float(r["close"]),
+            float(r["volume"]),
+            float(r["amount"]),
+            float(r.get("turnover", 0.0) or 0.0),
+            float(r.get("pct_change", 0.0) or 0.0)
+        )
+        for r in records
+    ]
+
+    cursor.executemany("""
+    INSERT INTO kline_daily (symbol, date, open, high, low, close, volume, amount, turnover, pct_change)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(symbol, date) DO UPDATE SET
+        open = excluded.open,
+        high = excluded.high,
+        low = excluded.low,
+        close = excluded.close,
+        volume = excluded.volume,
+        amount = excluded.amount,
+        turnover = excluded.turnover,
+        pct_change = excluded.pct_change
+    """, rows)
+
+    affected = cursor.rowcount
+    conn.commit()
+    conn.close()
+    return affected
+
+def query_daily_klines(symbol: str, limit: Optional[int] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    where_clauses = ["symbol = ?"]
+    params = [symbol]
+
+    if start_date:
+        where_clauses.append("date >= ?")
+        params.append(start_date)
+    if end_date:
+        where_clauses.append("date <= ?")
+        params.append(end_date)
+
+    where_str = " AND ".join(where_clauses)
+
+    if limit:
+        query = f"""
+        SELECT * FROM (
+            SELECT date, open, high, low, close, volume, amount, turnover, pct_change
+            FROM kline_daily
+            WHERE {where_str}
+            ORDER BY date DESC
+            LIMIT ?
+        ) ORDER BY date ASC
+        """
+        params.append(limit)
+    else:
+        query = f"""
+        SELECT date, open, high, low, close, volume, amount, turnover, pct_change
+        FROM kline_daily
+        WHERE {where_str}
+        ORDER BY date ASC
+        """
+
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
 def get_data_stats() -> Dict[str, Any]:
     conn = get_connection()
     cursor = conn.cursor()
@@ -368,7 +471,10 @@ def get_data_stats() -> Dict[str, Any]:
         COUNT(k.datetime) as bar_count,
         MIN(k.datetime) as first_time,
         MAX(k.datetime) as latest_time,
-        s.last_sync_time
+        s.last_sync_time,
+        (SELECT COUNT(*) FROM kline_daily d WHERE d.symbol = s.symbol) as daily_count,
+        (SELECT MIN(d.date) FROM kline_daily d WHERE d.symbol = s.symbol) as daily_first,
+        (SELECT MAX(d.date) FROM kline_daily d WHERE d.symbol = s.symbol) as daily_latest
     FROM stocks s
     LEFT JOIN kline_5m k ON s.symbol = k.symbol
     GROUP BY s.symbol, s.name, s.last_sync_time
