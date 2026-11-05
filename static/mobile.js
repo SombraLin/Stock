@@ -3,7 +3,7 @@
 let mChart = null;
 let currentSymbol = 'sh600036';
 let currentLimit = 300;
-let currentStrategy = 'boll_reversion';
+let currentStrategy = 'regime_confluence';
 let currentPrice = 0.0;
 let currentPosShares = 0;
 let tradeActionType = 'BUY'; // 'BUY' | 'SELL'

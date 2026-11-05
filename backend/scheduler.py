@@ -91,9 +91,9 @@ def check_and_notify_signals() -> List[Dict[str, Any]]:
                 continue
             
             stock_df = pd.DataFrame(stock_rows)
-            # 使用经过大样本检验的旗舰策略：布林带极值均值回归
-            strat_key = "boll_reversion"
-            res = generate_signals(stock_df, idx_df, strategy_name=strat_key)
+            # 使用经过大样本检验的旗舰策略：日线共振与大盘联动波段
+            strat_key = "regime_confluence"
+            res = generate_signals(stock_df, idx_df, strategy_name=strat_key, symbol=sym)
             signals = res.get("signals", [])
             if not signals:
                 continue
@@ -172,7 +172,7 @@ def track_recommendations():
             if len(rows) < 60:
                 continue
             result = generate_signals(pd.DataFrame(rows), pd.DataFrame(idx_rows) if idx_rows else None,
-                                      strategy_name="boll_reversion")
+                                      strategy_name="regime_confluence", symbol=symbol)
             record(symbol, result, rows, idx_rows, now=now)
             # Existing events need a history longer than the live signal warmup.
             evaluate(symbol, query_klines(symbol, limit=None), now=now)

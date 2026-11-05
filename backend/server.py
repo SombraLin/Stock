@@ -150,7 +150,7 @@ async def api_klines(symbol: str = "sh600036", limit: int = 1500):
     })
 
 @app.get("/api/analysis")
-async def api_analysis(symbol: str = "sh600036", strategy: str = "boll_reversion", limit: int = 1500):
+async def api_analysis(symbol: str = "sh600036", strategy: str = "regime_confluence", limit: int = 1500):
     """
     运行策略量化分析并返回包含技术指标、买卖点信号与回测评估结果，以及针对最新盘面的交易提示
     """
@@ -165,7 +165,7 @@ async def api_analysis(symbol: str = "sh600036", strategy: str = "boll_reversion
     stock_df = pd.DataFrame(stock_rows)
     idx_df = pd.DataFrame(idx_rows) if idx_rows else None
     
-    result = generate_signals(stock_df, idx_df, strategy_name=strategy)
+    result = generate_signals(stock_df, idx_df, strategy_name=strategy, symbol=symbol)
     return JSONResponse(content={
         "status": "success",
         "strategy": strategy,
